@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>در راه</title>
+<style>
+  body{font-family:sans-serif;background:#f4f4f4;margin:0;
+         display:flex;justify-content:center;padding:20px}
+           .box{background:#fff;padding:20px;border-radius:12px;
+                  width:100%;max-width:360px}
+                    input,button{width:100%;padding:12px;margin-top:10px;
+                           font-size:16px;box-sizing:border-box}
+                             button{background:#0a7;color:#fff;border:0;border-radius:8px}
+                               #msg{color:#c00;margin-top:10px}
+                               </style>
+                               </head>
+                               <body>
+                               <div class="box">
+                                 <h2>ورود به «در راه»</h2>
+                                   <div id="step1">
+                                       <input id="phone" type="tel" dir="ltr" placeholder="+93700000000">
+                                           <button id="send">ارسال کد</button>
+                                             </div>
+                                               <div id="step2" hidden>
+                                                   <input id="code" type="number" dir="ltr" placeholder="کد تأیید">
+                                                       <button id="verify">تأیید</button>
+                                                         </div>
+                                                           <div id="home" hidden>
+                                                               <p>وارد شدید ✅</p>
+                                                                   <p id="who" dir="ltr"></p>
+                                                                       <button id="logout">خروج</button>
+                                                                         </div>
+                                                                           <p id="msg"></p>
+                                                                             <div id="recaptcha"></div>
+                                                                             </div>
+                                                                             <script type="module">
+                                                                             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+                                                                             import { getAuth, RecaptchaVerifier, signInWithPhoneNumber,
+                                                                                      onAuthStateChanged, signOut }
+                                                                                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+                                                                                        const firebaseConfig = {
+                                                                                          apiKey: "AIzaSyBU7zfoJjlwz_3OXEAPDUTFZv00gX6TGPE",
+                                                                                            authDomain: "on-the-way-41120.firebaseapp.com",
+                                                                                              projectId: "on-the-way-41120",
+                                                                                                storageBucket: "on-the-way-41120.firebasestorage.app",
+                                                                                                  messagingSenderId: "505610025231",
+                                                                                                    appId: "1:505610025231:web:be00fecdcdb29e574fa67a"
+                                                                                                    };
+
+                                                                                                    const app = initializeApp(firebaseConfig);
+                                                                                                    const auth = getAuth(app);
+                                                                                                    auth.languageCode = "fa";
+                                                                                                    const $ = id => document.getElementById(id);
+                                                                                                    const show = (...ids) => {
+                                                                                                      ["step1","step2","home"].forEach(i => $(i).hidden = !ids.includes(i));
+                                                                                                      };
+                                                                                                      let confirmation = null;
+                                                                                                      const verifier = new RecaptchaVerifier(auth, "recaptcha", { size: "invisible" });
+
+                                                                                                      $("send").onclick = async () => {
+                                                                                                        $("msg").textContent = "";
+                                                                                                          try {
+                                                                                                              confirmation = await signInWithPhoneNumber(
+                                                                                                                    auth, $("phone").value.trim(), verifier);
+                                                                                                                        show("step2");
+                                                                                                                          } catch (e) { $("msg").textContent = "خطا: " + e.code; }
+                                                                                                                          };
+                                                                                                                          $("verify").onclick = async () => {
+                                                                                                                            $("msg").textContent = "";
+                                                                                                                              try { await confirmation.confirm($("code").value.trim()); }
+                                                                                                                                catch (e) { $("msg").textContent = "کد اشتباه است"; }
+                                                                                                                                };
+                                                                                                                                $("logout").onclick = () => signOut(auth);
+                                                                                                                                onAuthStateChanged(auth, user => {
+                                                                                                                                  if (user) { $("who").textContent = user.phoneNumber; show("home"); }
+                                                                                                                                    else show("step1");
+                                                                                                                                    });
+                                                                                                                                    </script>
+                                                                                                                                    </body>
+                                                                                                                                    </html>
